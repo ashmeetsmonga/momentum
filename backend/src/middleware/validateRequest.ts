@@ -10,7 +10,7 @@ export const validateRequest = (schema: AnyZodObject) => {
       if (error instanceof ZodError) {
         res.status(400).json({
           message: "Validation Error",
-          errors: error.errors,
+          errors: error.errors.map((errObj) => errObj.message),
         });
       } else {
         next(error); // Pass other errors to the global error handler
