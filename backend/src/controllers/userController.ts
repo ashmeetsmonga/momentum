@@ -1,8 +1,16 @@
 import { Request, Response } from "express";
-import { z, ZodError } from "zod";
+import { UserModel } from "../db/modals/User";
+import asyncHandler from "../middleware/asyncHandler";
 
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
-  console.log(name, email, password);
-  res.status(201).json({ message: "User created successfully" });
-};
+
+  const user = await UserModel.findOne({ email });
+  if (user) {
+    res.status(400).json({ msg: "User with email already exists" });
+    return;
+  }
+  const newUser = await UserModel.create({ name, email, password });
+  const token = newUser.createJWT();
+  res.status(201).json({ newUser, token });
+});
